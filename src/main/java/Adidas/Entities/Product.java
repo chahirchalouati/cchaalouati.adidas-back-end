@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -21,6 +23,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.UpdateTimestamp;
 
 /**
@@ -41,24 +45,32 @@ public class Product implements Serializable {
     private String code;
     private Double price;
     private Integer quantity;
+    @Lob
     private String description;
     private Boolean isNew = true;
+    private String gender;
     @Temporal(TemporalType.DATE)
     private Date productionDate = new Date();
-
-    @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @ManyToMany
     private List<Color> colors = new ArrayList<>();
-    @OneToMany
+    @ManyToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Size> sizes = new ArrayList<>();
-    @OneToMany
+    @ManyToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Category> categories = new ArrayList<>();
     @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Detail> details = new ArrayList<>();
     @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Rating> ratings = new ArrayList<>();
     @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Review> reviews = new ArrayList<>();
     @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<File> files = new ArrayList<>();
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

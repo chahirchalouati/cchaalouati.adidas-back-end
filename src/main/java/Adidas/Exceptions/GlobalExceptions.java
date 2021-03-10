@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentConversionNotSupportedException;
 
 /**
  *
@@ -45,4 +46,8 @@ public class GlobalExceptions {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    public ResponseEntity<?> methodArgumentConversionNotSupportedException(MethodArgumentConversionNotSupportedException ex) {
+        ApiResponse response = new ApiResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, new Date());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }

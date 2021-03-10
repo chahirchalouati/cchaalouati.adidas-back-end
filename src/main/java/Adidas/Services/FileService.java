@@ -8,14 +8,13 @@ package Adidas.Services;
 import Adidas.Entities.File;
 import Adidas.Exceptions.FileStorageException;
 import Adidas.Repositories.FileRepository;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +22,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.imgscalr.Scalr;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.CacheControl;
@@ -30,7 +31,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -41,100 +41,61 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class FileService {
 
-    private final String currentDir = "./adidas/media/products";
-
+    @Autowired
     private FileRepository fileRepository;
 
-    public FileService() {
+    private final String baseDir = ".\\products";
+
+    public FileService() throws IOException {
+        boolean dirExists = Files.exists(Paths.get(baseDir).toAbsolutePath().normalize());
+
+        if (!dirExists) {
+            Files.createDirectory(Paths.get(baseDir).toAbsolutePath().normalize());
+        }
+
+    }
+
+    /**
+     * store assets file like image for shop and other
+     *
+     * @param multipartFile
+     * @return
+     */
+    public File storeFiles(MultipartFile multipartFile) {
+
         try {
-            boolean dirExists = Files.exists(Paths.get(currentDir).toAbsolutePath().normalize());
+            String fileExtentions = multipartFile.getOriginalFilename()
+                    .substring(multipartFile.getOriginalFilename().length() - 3);
 
-            if (!dirExists) {
-                Files.createDirectory(Paths.get(currentDir).toAbsolutePath().normalize());
-            }
-        } catch (IOException e) {
-            log.error(currentDir, e);
+            String fileName = "product__".concat(UUID.randomUUID().toString())
+                    .concat("size___original")
+                    .concat(".")
+                    .concat(fileExtentions);
+
+            Path path = Paths.get(baseDir.concat("/").concat(fileName)).toAbsolutePath().normalize();
+            // copy file in base directory
+            long copy = Files.copy(multipartFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+            File file = new File();
+            file.setCreatedAt(new Date());
+            file.setFilePath(path.toString());
+            file.setFileType(multipartFile.getContentType());
+            file.setFileUrl("/files/".concat(fileName));
+            file.setName(fileName);
+            file.setFileSize(copy);
+            file.setId(null);
+            File save = fileRepository.save(file);
+
+            return save;
+
+        } catch (IOException ex) {
+            throw new FileStorageException("Unable to save file {} " + multipartFile.getOriginalFilename());
         }
 
     }
 
-    /**
-     * store assets file like image for shop and other
-     *
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    @Transactional
-    public File storeFiles(MultipartFile file) throws IOException {
-
-        String fileExtentions = file.getOriginalFilename().split("\\.")[1];
-        // to make file unique i use  combination of instant as String an UUID api to generate unique name
-        long epochSecond = Instant.now().getEpochSecond();
-        String newFileName
-                = //new Instant token as String
-                String.valueOf(epochSecond)
-                        //random UUID
-                        .concat(UUID.randomUUID().toString())
-                        //retreive extentions of file
-                        .concat(".")
-                        .concat(fileExtentions);
-
-        String concat = currentDir
-                .concat("/")
-                .concat(newFileName);
-
-        //create path for new File to store
-        Path path = Paths.get(concat).toAbsolutePath().normalize();
-        // copy file in base directory
-        long copy = Files
-                .copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        // prepare file data for database storage
-        File File = new File(
-                null,
-                newFileName,
-                path.toString(),
-                "/files/" + newFileName,
-                copy,
-                file.getContentType(),
-                new Date(),
-                new Date());
-        if (copy > 0) {
-            fileRepository.save(File);
-        } else {
-            throw new FileStorageException("Unable to save File ");
-        }
-        return File;
-    }
-
-    /**
-     * store assets file like image for shop and other
-     *
-     * @param stream
-     * @param fileName
-     * @param fileExtentions
-     * @return
-     * @throws IOException
-     */
-    @Transactional
-    public File storeImageResized(InputStream stream, String fileName, String fileExtentions) throws IOException {
-        String concat = currentDir
-                .concat("/")
-                .concat(fileName);
-
-        //create path for new File to store
-        Path path = Paths.get(concat).toAbsolutePath().normalize();
-        // copy file in base directory
-        long copy = Files
-                .copy(stream, path, StandardCopyOption.REPLACE_EXISTING);
-        // prepare file data for database storage
-        File File = new File(null, path.toString(), fileName, "/files/" + fileName, copy, "image/jpeg", new Date(), new Date());
-        if (copy > 0) {
-            fileRepository.save(File);
-        } else {
-            throw new FileStorageException("Unable to save File ");
-        }
-        return File;
+    BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) throws Exception {
+        return Scalr.resize(originalImage, Scalr.Method.AUTOMATIC, Scalr.Mode.AUTOMATIC, targetWidth, targetHeight, Scalr.OP_ANTIALIAS);
     }
 
     /**

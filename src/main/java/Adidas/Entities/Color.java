@@ -39,7 +39,6 @@ public class Color implements Serializable {
     private Long id;
     private String name;
     private String hex;
-
     @OneToOne(cascade = CascadeType.ALL)
     private HSL hsl;
     @OneToOne(cascade = CascadeType.ALL)

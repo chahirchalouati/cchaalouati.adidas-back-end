@@ -7,6 +7,9 @@ import Adidas.Enums.Gender;
 import Adidas.Repositories.CategoryRepository;
 import Adidas.Repositories.RoleRepository;
 import Adidas.Repositories.SizeRepository;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Date;
 import org.springframework.boot.CommandLineRunner;
@@ -86,4 +89,14 @@ public class AdidasApplication {
         SpringApplication.run(AdidasApplication.class, args);
     }
 
+    @Bean
+    public ObjectMapper getJacksonObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        objectMapper.configure(
+                com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return objectMapper;
+    }
 }
