@@ -16,7 +16,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- *
  * @author Chahir Chalouati
  */
 @Service
@@ -30,7 +29,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = repository.findByEmail(email);
         if (user == null) {
             throw new UserNotFoundException(email);
-
         }
         return new MyUserDetailsImpl(user);
 

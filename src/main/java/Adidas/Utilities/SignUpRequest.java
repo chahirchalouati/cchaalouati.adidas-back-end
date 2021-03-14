@@ -7,25 +7,24 @@ package Adidas.Utilities;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 /**
- *
  * @author Chahir Chalouati
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@ToString
 public class SignUpRequest {
-
-    @Email
+    @Email(message = "error.email.not-valid")
     private String email;
-    @NotBlank
+    @NotBlank(message = "error.password.required")
     private String password;
-    @NotBlank
+    @NotBlank(message = "error.firstname.required")
     private String firstname;
-    @NotBlank
+    @NotBlank(message = "error.lastname.required")
     private String lastname;
 }

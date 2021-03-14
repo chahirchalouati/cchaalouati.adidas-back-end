@@ -7,13 +7,12 @@ package Adidas.Repositories;
 
 import Adidas.Entities.File;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
- *
  * @author Chahir Chalouati
  */
+@Repository
 public interface FileRepository extends JpaRepository<File, Long> {
-
     public File findByName(String filename);
-
 }

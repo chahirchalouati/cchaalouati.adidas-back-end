@@ -5,6 +5,7 @@
  */
 package Adidas.Security;
 
+import Adidas.Entities.User;
 import Adidas.Utilities.SignInRequest;
 import Adidas.Utilities.SignUpRequest;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import org.springframework.http.ResponseEntity;
  */
 public interface AuthenticationService {
 
-    ResponseEntity<?> signUp(SignUpRequest request);
+    User signUp(SignUpRequest request);
 
     ResponseEntity<?> signIn(SignInRequest request);
 }

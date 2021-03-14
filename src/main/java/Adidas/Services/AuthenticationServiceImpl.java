@@ -5,67 +5,56 @@
  */
 package Adidas.Services;
 
+import Adidas.DTO.SignUpRequestMapper;
 import Adidas.Entities.User;
 import Adidas.Exceptions.UserExistException;
-import Adidas.Repositories.RoleRepository;
 import Adidas.Repositories.UserRepository;
 import Adidas.Security.AuthenticationService;
 import Adidas.Utilities.JWTResponse;
 import Adidas.Utilities.JwtUtils;
 import Adidas.Utilities.SignInRequest;
 import Adidas.Utilities.SignUpRequest;
-import java.util.Date;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.Optional;
+
 /**
- *
  * @author Chahir Chalouati
  */
 @Service
+@AllArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+    private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
+    private final SignUpRequestMapper signUpRequestMapper;
+    private final JwtUtils jwtUtils;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    private BCryptPasswordEncoder encoder;
 
     @Override
-    public ResponseEntity<?> signUp(SignUpRequest request) {
+    public User signUp(SignUpRequest request) {
+        logger.debug("SERVICE::REQUEST TO SIGNUP {}", request);
         if (userRepository.existByEmail(request.getEmail())) {
             throw new UserExistException("E-mail already exist");
         }
-        encoder = new BCryptPasswordEncoder();
-
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setFirstname(request.getFirstname());
-        user.setLastname(request.getLastname());
-        user.setPassword(encoder.encode(request.getPassword()));
-        user.setRoles(List.of(roleRepository.findByRole("USER")));
-        return new ResponseEntity<>(userRepository.save(user), HttpStatus.CREATED);
+        return Optional.of(request)
+                .map(signUpRequestMapper::toModel)
+                .map(userRepository::save)
+                .orElse(null);
     }
 
     @Override
     public ResponseEntity<?> signIn(SignInRequest request) {
-
+        logger.debug("SERVICE::REQUEST TO SIGNIN {}", request);
         UsernamePasswordAuthenticationToken authenticationToken
                 = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 

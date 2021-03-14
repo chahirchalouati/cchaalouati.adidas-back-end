@@ -6,6 +6,7 @@
 package Adidas.Entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +20,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,13 +31,13 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.UpdateTimestamp;
 
 /**
- *
  * @author Chahir Chalouati
  */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
+@Builder
 @Table(name = "Users")
 public class User implements Serializable {
 

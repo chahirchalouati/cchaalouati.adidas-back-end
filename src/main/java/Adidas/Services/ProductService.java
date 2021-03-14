@@ -5,21 +5,10 @@
  */
 package Adidas.Services;
 
-import Adidas.Entities.Category;
-import Adidas.Entities.Color;
-import Adidas.Entities.File;
-import Adidas.Entities.Product;
-import Adidas.Entities.Rating;
-import Adidas.Entities.Size;
+import Adidas.Entities.*;
 import Adidas.Exceptions.FileStorageException;
 import Adidas.Projection.ProductVW;
-import Adidas.Repositories.CategoryRepository;
-import Adidas.Repositories.ColorRepository;
-import Adidas.Repositories.ProductRepository;
-import Adidas.Repositories.SizeRepository;
-import Adidas.Repositories.UserRepository;
-import java.util.List;
-import java.util.stream.Collectors;
+import Adidas.Repositories.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -54,27 +46,27 @@ public class ProductService {
             throw new FileStorageException("Product must contain at least one  Image Or Video");
         }
         List<File> files = productVW.getFiles().stream()
-                .map(file -> fileService.storeFiles(file)).collect(Collectors.toList());
+                .map(fileService::storeFiles).collect(Collectors.toList());
 
         List<Size> sizes = productVW.getSizes()
                 .stream()
                 .distinct()
                 .collect(Collectors.toList())
                 .stream()
-                .map(size -> sizeRepository.getOne(size))
+                .map(sizeRepository::getOne)
                 .collect(Collectors.toList());
 
         List<Category> categories = productVW.getCategories()
                 .stream()
                 .distinct()
                 .collect(Collectors.toList())
-                .stream().map(category -> categoryRepository.getOne(category)).collect(Collectors.toList());
+                .stream().map(categoryRepository::getOne).collect(Collectors.toList());
 
         List<Color> colors = productVW.getColors()
                 .stream()
                 .distinct()
                 .collect(Collectors.toList()).stream()
-                .map(color -> colorRepository.getOne(color)).collect(Collectors.toList());
+                .map(colorRepository::getOne).collect(Collectors.toList());
 
         Product product = new Product();
 //        Faker faker = new Faker();

@@ -8,6 +8,7 @@ package Adidas.Services;
 import Adidas.Entities.File;
 import Adidas.Exceptions.FileStorageException;
 import Adidas.Repositories.FileRepository;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- *
  * @author Chahir Chalouati
  */
 @Service
